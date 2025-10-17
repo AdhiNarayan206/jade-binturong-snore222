@@ -14,6 +14,7 @@ import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
 import ProjectDetail from "./pages/ProjectDetail";
 import DocumentDetail from "./pages/DocumentDetail";
+import Teams from "./pages/Teams";
 import { ThemeProvider } from "./components/theme-provider";
 import { supabase } from "./integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
@@ -59,6 +60,7 @@ const App = () => {
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/projects/:projectId" element={<ProjectDetail />} />
                 <Route path="/tasks" element={<Tasks />} />
+                <Route path="/teams" element={<Teams />} />
                 <Route path="/contributions" element={<Contributions />} />
                 <Route path="/documents" element={<Documents />} />
                 <Route path="/documents/:documentId" element={<DocumentDetail />} />

@@ -6,6 +6,7 @@ import {
   GitMerge,
   FileText,
   Package,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -14,6 +15,7 @@ const links = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/projects", label: "Projects", icon: FolderKanban },
   { to: "/tasks", label: "Tasks", icon: ListTodo },
+  { to: "/teams", label: "Teams", icon: Users },
   { to: "/contributions", label: "Contributions", icon: GitMerge },
   { to: "/documents", label: "Documents", icon: FileText },
 ];
