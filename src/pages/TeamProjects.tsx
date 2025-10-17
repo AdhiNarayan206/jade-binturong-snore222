@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useMemo } from "react";
+import { Link, useParams } from "react-router-dom";
 import { projects as initialProjects, Project } from "@/data/mockData";
 import {
   Card,
@@ -20,8 +20,13 @@ import { Badge } from "@/components/ui/badge";
 import { CreateProjectDialog } from "@/components/CreateProjectDialog";
 import { cn } from "@/lib/utils";
 
-const Projects = () => {
+const TeamProjects = () => {
+  const { teamId } = useParams<{ teamId: string }>();
   const [projects, setProjects] = useState<Project[]>(initialProjects);
+
+  const teamProjects = useMemo(() => {
+    return projects.filter(p => p.teamId === teamId);
+  }, [projects, teamId]);
 
   const handleProjectCreated = (newProject: Project) => {
     setProjects((prevProjects) => [...prevProjects, newProject]);
@@ -38,21 +43,23 @@ const Projects = () => {
     }
   };
 
+  if (!teamId) return <div>Invalid Team ID.</div>;
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Projects</h1>
+          <h2 className="text-2xl font-bold">Projects</h2>
           <p className="text-muted-foreground">
-            Here you can create, view, and manage all your projects.
+            Create, view, and manage projects for this team.
           </p>
         </div>
         <CreateProjectDialog onProjectCreated={handleProjectCreated} />
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>All Projects</CardTitle>
-          <CardDescription>A list of all projects in your workspace.</CardDescription>
+          <CardTitle>Team Projects</CardTitle>
+          <CardDescription>A list of all projects managed by this team.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -64,7 +71,7 @@ const Projects = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {projects.map((project) => (
+              {teamProjects.map((project) => (
                 <TableRow key={project.id}>
                   <TableCell>
                     <Link to={`/projects/${project.id}`} className="font-medium text-primary hover:underline">
@@ -79,10 +86,15 @@ const Projects = () => {
               ))}
             </TableBody>
           </Table>
+          {teamProjects.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No projects found for this team.
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
   );
 };
 
-export default Projects;
+export default TeamProjects;

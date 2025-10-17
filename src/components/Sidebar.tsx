@@ -25,14 +25,16 @@ import { showError } from "@/utils/toast";
 
 const mainLinks = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/tasks", label: "Tasks", icon: ListTodo },
+  // Tasks link is removed from main links as MyTasks is now on the Dashboard
 ];
 
 const workspaceLinks = [
-  { to: "/projects", label: "Projects", icon: FolderKanban },
   { to: "/teams", label: "Teams", icon: Users },
-  { to: "/documents", label: "Documents", icon: FileText },
-  { to: "/contributions", label: "Contributions", icon: GitMerge },
+  // The following links now point to the Teams page, where the user selects a workspace
+  { to: "/teams", label: "Projects", icon: FolderKanban },
+  { to: "/teams", label: "Tasks", icon: ListTodo },
+  { to: "/teams", label: "Documents", icon: FileText },
+  { to: "/teams", label: "Contributions", icon: GitMerge },
 ];
 
 const Sidebar = () => {

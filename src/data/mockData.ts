@@ -20,6 +20,7 @@ export type Project = {
   description: string;
   status: "On Track" | "At Risk" | "Off Track";
   dueDate: string;
+  teamId: string; // Added teamId
 };
 
 export type Document = {
@@ -35,6 +36,10 @@ export const users: User[] = [
   { id: "user-3", name: "Charlie", avatar: "/placeholder.svg" },
 ];
 
+// Mock Team IDs for demonstration
+const MOCK_TEAM_ID_1 = "team-alpha";
+const MOCK_TEAM_ID_2 = "team-beta";
+
 export let projects: Project[] = [
   {
     id: "proj-1",
@@ -42,6 +47,7 @@ export let projects: Project[] = [
     description: "Complete overhaul of the user interface for better user experience.",
     status: "On Track",
     dueDate: "2024-09-30",
+    teamId: MOCK_TEAM_ID_1,
   },
   {
     id: "proj-2",
@@ -49,6 +55,7 @@ export let projects: Project[] = [
     description: "Integrate GitHub API for contribution tracking.",
     status: "At Risk",
     dueDate: "2024-08-15",
+    teamId: MOCK_TEAM_ID_1,
   },
   {
     id: "proj-3",
@@ -56,6 +63,7 @@ export let projects: Project[] = [
     description: "Refactor the backend services for scalability and performance.",
     status: "Off Track",
     dueDate: "2024-08-20",
+    teamId: MOCK_TEAM_ID_2,
   },
 ];
 
@@ -95,6 +103,15 @@ export let tasks: Task[] = [
     dueDate: "2024-08-12",
     assigneeId: "user-3",
     projectId: "proj-2",
+  },
+  {
+    id: "task-5",
+    title: "Optimize database queries",
+    status: "To Do",
+    priority: "High",
+    dueDate: "2024-08-25",
+    assigneeId: "user-1",
+    projectId: "proj-3",
   },
 ];
 

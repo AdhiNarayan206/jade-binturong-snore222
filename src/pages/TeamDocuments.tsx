@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { documents as initialDocuments, Document } from "@/data/mockData";
+import { useState, useMemo } from "react";
+import { Link, useParams } from "react-router-dom";
+import { documents as initialDocuments, Document, projects } from "@/data/mockData";
 import {
   Card,
   CardContent,
@@ -11,8 +11,18 @@ import {
 import { CreateDocumentDialog } from "@/components/CreateDocumentDialog";
 import { UploadDocument } from "@/components/UploadDocument";
 
-const Documents = () => {
+// NOTE: Since documents are not directly linked to teams in mockData, 
+// we will temporarily link them via projects for demonstration purposes.
+// For now, we will show all documents until a proper team association is implemented.
+// In a real application, documents would have a teamId column.
+
+const TeamDocuments = () => {
+  const { teamId } = useParams<{ teamId: string }>();
   const [documents, setDocuments] = useState<Document[]>(initialDocuments);
+
+  // In a real app, we would filter documents by teamId. 
+  // Since mock data doesn't have doc.teamId, we show all for now.
+  const teamDocuments = documents; 
 
   const handleDocumentCreated = (newDocument: Document) => {
     setDocuments((prev) => [...prev, newDocument]);
@@ -22,9 +32,9 @@ const Documents = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Documents</h1>
+          <h2 className="text-2xl font-bold">Documents</h2>
           <p className="text-muted-foreground">
-            Collaborate on documents and track changes seamlessly.
+            Collaborate on documents for this team.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -33,9 +43,11 @@ const Documents = () => {
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {documents.map((doc) => (
+        {teamDocuments.map((doc) => (
           <Link
-            to={`/documents/${doc.id}`}
+            // We need to ensure the link goes back to the team context if needed, 
+            // but for now, we use the global document detail route.
+            to={`/documents/${doc.id}`} 
             key={doc.id}
             className="block hover:shadow-lg transition-shadow rounded-lg"
           >
@@ -57,8 +69,13 @@ const Documents = () => {
           </Link>
         ))}
       </div>
+      {teamDocuments.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          No documents found for this team.
+        </div>
+      )}
     </div>
   );
 };
 
-export default Documents;
+export default TeamDocuments;

@@ -9,6 +9,7 @@ import { Activity, CheckCircle, Clock } from "lucide-react";
 import { projects, tasks } from "@/data/mockData";
 import { addDays, isAfter, isBefore } from "date-fns";
 import { TeamContributionChart } from "@/components/TeamContributionChart";
+import MyTasks from "@/components/MyTasks";
 
 const Dashboard = () => {
   // Calculate stats from mock data
@@ -76,6 +77,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
+      <MyTasks />
       <TeamContributionChart />
     </div>
   );
