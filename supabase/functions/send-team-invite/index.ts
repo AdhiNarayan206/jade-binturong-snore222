@@ -7,7 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// The RESEND_API_KEY must be set as a secret in your Supabase project settings for this function.
 const resend = new Resend(Deno.env.get('RESEND_API_KEY') ?? '')
 
 serve(async (req) => {
@@ -27,12 +26,16 @@ serve(async (req) => {
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     )
 
-    // Get inviter's profile to include in the email
+    // Get inviter's data and check for a valid session
     const { data: { user: inviter } } = await supabaseClient.auth.getUser()
-    const { data: inviterProfile } = await supabaseClient.from('profiles').select('full_name').eq('id', inviter!.id).single()
-    const inviterName = inviterProfile?.full_name || inviter?.email
+    if (!inviter) {
+      throw new Error("Authentication error. Your session may have expired. Please log in again.")
+    }
 
-    // Get team name
+    const { data: inviterProfile } = await supabaseClient.from('profiles').select('full_name').eq('id', inviter.id).single()
+    const inviterName = inviterProfile?.full_name || inviter.email
+
+    // Get team name and check if inviter is an admin
     const { data: team, error: teamError } = await supabaseClient
       .from('teams')
       .select('name')
@@ -42,28 +45,26 @@ serve(async (req) => {
     if (teamError) throw new Error('Team not found or you do not have access.')
     const teamName = team.name
 
-    // Check if the inviter is an admin of the team
     const { data: isAdmin, error: isAdminError } = await supabaseClient.rpc('is_admin_of', { team_id_to_check: teamId })
     if (isAdminError || !isAdmin) {
-      throw new Error('You must be an admin to invite members.')
+      throw new Error('Permission denied. You must be an admin to invite members.')
     }
 
+    // Use the admin client for user management
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Check if user exists or invite them
+    // Find or invite the user by email
     let userId;
-    let isNewUser = false;
     const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserByEmail(email)
     
     if (userError) {
         if (userError.message.includes('User not found')) {
             const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email)
-            if (inviteError) throw inviteError
+            if (inviteError) throw new Error(`Could not invite new user: ${inviteError.message}`)
             userId = inviteData.user.id
-            isNewUser = true
         } else {
             throw userError
         }
@@ -80,24 +81,28 @@ serve(async (req) => {
       .maybeSingle()
 
     if (existingMember && existingMember.status !== 'declined') {
-      throw new Error('User is already a member or has a pending invitation.')
+      throw new Error('This user is already a member or has a pending invitation.')
     }
 
-    // Insert a pending invitation
+    // Insert a pending invitation record
     const { error: insertError } = await supabaseAdmin
       .from('team_members')
       .insert({ team_id: teamId, user_id: userId, status: 'pending', role: 'Member' })
-    if (insertError) throw insertError
+    if (insertError) throw new Error(`Database error: Could not add member to team.`)
 
     // Send email notification via Resend
-    const appUrl = Deno.env.get('SUPABASE_URL')?.split('//')[1].split('.')[0]
+    const projectRef = Deno.env.get('SUPABASE_URL')?.split('.')[0].replace('https://', '')
+    const siteUrl = `https://${projectRef}.vercel.app` // Assumes Vercel deployment convention
+    const invitationUrl = `${siteUrl}/teams`
+
     const subject = `You're invited to join the ${teamName} team on CollabMate!`
     const body = `
       <html><body>
         <h2>Hello!</h2>
         <p>${inviterName} has invited you to join the <strong>${teamName}</strong> team on CollabMate.</p>
-        <p>You can accept or decline this invitation by logging into your account.</p>
-        <a href="https://${appUrl}.vercel.app/teams" style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: #007bff; text-decoration: none; border-radius: 5px;">
+        <p>If you are a new user, you will receive a separate email from Supabase to set up your account.</p>
+        <p>Once your account is ready, you can accept or decline this invitation by logging in and visiting the Teams page.</p>
+        <a href="${invitationUrl}" style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: #007bff; text-decoration: none; border-radius: 5px;">
           View Invitation
         </a>
         <p>If you were not expecting this invitation, you can ignore this email.</p>
@@ -117,7 +122,7 @@ serve(async (req) => {
     })
 
   } catch (error) {
-    console.error(error)
+    console.error("Error in send-team-invite function:", error)
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
