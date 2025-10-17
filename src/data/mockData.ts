@@ -22,6 +22,13 @@ export type Project = {
   dueDate: string;
 };
 
+export type Document = {
+  id: string;
+  title: string;
+  content: string;
+  lastModified: string;
+};
+
 export const users: User[] = [
   { id: "user-1", name: "Alice", avatar: "/placeholder.svg" },
   { id: "user-2", name: "Bob", avatar: "/placeholder.svg" },
@@ -91,6 +98,21 @@ export let tasks: Task[] = [
   },
 ];
 
+export let documents: Document[] = [
+  {
+    id: "doc-1",
+    title: "Project Charter: UI Redesign",
+    content: "This document outlines the scope, objectives, and participants of the UI Redesign project.",
+    lastModified: "2024-07-20",
+  },
+  {
+    id: "doc-2",
+    title: "API Integration Specifications",
+    content: "Technical specifications for integrating the GitHub API.",
+    lastModified: "2024-07-18",
+  },
+];
+
 // Functions to add to mock data to simulate creation
 export const addProject = (project: Omit<Project, 'id'>) => {
   const newProject = { ...project, id: `proj-${Date.now()}` };
@@ -102,4 +124,14 @@ export const addTask = (task: Omit<Task, 'id'>) => {
   const newTask = { ...task, id: `task-${Date.now()}` };
   tasks = [...tasks, newTask];
   return newTask;
+}
+
+export const addDocument = (doc: Omit<Document, 'id' | 'lastModified'>) => {
+  const newDocument = { 
+    ...doc, 
+    id: `doc-${Date.now()}`,
+    lastModified: new Date().toISOString().split('T')[0] 
+  };
+  documents = [...documents, newDocument];
+  return newDocument;
 }

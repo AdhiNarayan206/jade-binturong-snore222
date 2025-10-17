@@ -1,10 +1,52 @@
+import { useState } from "react";
+import { documents as initialDocuments, Document } from "@/data/mockData";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { CreateDocumentDialog } from "@/components/CreateDocumentDialog";
+
 const Documents = () => {
+  const [documents, setDocuments] = useState<Document[]>(initialDocuments);
+
+  const handleDocumentCreated = (newDocument: Document) => {
+    setDocuments((prev) => [...prev, newDocument]);
+  };
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-4">Documents</h1>
-      <p className="text-muted-foreground">
-        Collaborate on documents and track changes seamlessly.
-      </p>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Documents</h1>
+          <p className="text-muted-foreground">
+            Collaborate on documents and track changes seamlessly.
+          </p>
+        </div>
+        <CreateDocumentDialog onDocumentCreated={handleDocumentCreated} />
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {documents.map((doc) => (
+          <Card key={doc.id}>
+            <CardHeader>
+              <CardTitle>{doc.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground line-clamp-3">
+                {doc.content}
+              </p>
+            </CardContent>
+            <CardFooter>
+              <p className="text-xs text-muted-foreground">
+                Last modified: {doc.lastModified}
+              </p>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };
