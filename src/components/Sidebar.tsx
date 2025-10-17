@@ -17,7 +17,7 @@ const links = [
   { to: "/tasks", label: "Tasks", icon: ListTodo },
   { to: "/contributions", label: "Contributions", icon: GitMerge },
   { to: "/documents", label: "Documents", icon: FileText },
-  { to: "/settings", label: "Settings", icon: Settings },
+  { to: "/account", label: "Account", icon: Settings },
 ];
 
 const Sidebar = () => {

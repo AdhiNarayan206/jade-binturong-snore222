@@ -17,11 +17,11 @@ import {
 } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 
-const Settings = () => {
+const Account = () => {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
+        <h1 className="text-3xl font-bold">Account</h1>
         <p className="text-muted-foreground">
           Manage your account and application settings.
         </p>
@@ -60,7 +60,7 @@ const Settings = () => {
               <CardTitle>Notifications</CardTitle>
               <CardDescription>
                 Configure how you receive notifications.
-              </CardDescription>
+              </Description>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -89,4 +89,4 @@ const Settings = () => {
   );
 };
 
-export default Settings;
+export default Account;
