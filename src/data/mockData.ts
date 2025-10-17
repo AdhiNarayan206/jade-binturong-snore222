@@ -97,3 +97,9 @@ export const addProject = (project: Omit<Project, 'id'>) => {
   projects = [...projects, newProject];
   return newProject;
 }
+
+export const addTask = (task: Omit<Task, 'id'>) => {
+  const newTask = { ...task, id: `task-${Date.now()}` };
+  tasks = [...tasks, newTask];
+  return newTask;
+}

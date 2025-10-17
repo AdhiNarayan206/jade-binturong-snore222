@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { projects, tasks, users } from "@/data/mockData";
+import { projects, tasks as initialTasks, users, Task } from "@/data/mockData";
 import {
   Card,
   CardContent,
@@ -18,15 +19,22 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { CreateTaskDialog } from "@/components/CreateTaskDialog";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
   const project = projects.find((p) => p.id === projectId);
-  const projectTasks = tasks.filter((t) => t.projectId === projectId);
+  const [projectTasks, setProjectTasks] = useState<Task[]>(
+    initialTasks.filter((t) => t.projectId === projectId)
+  );
 
   if (!project) {
     return <div>Project not found</div>;
   }
+
+  const handleTaskCreated = (newTask: Task) => {
+    setProjectTasks((prevTasks) => [...prevTasks, newTask]);
+  };
 
   const getPriorityVariant = (priority: string) => {
     if (priority === "High") return "destructive";
@@ -46,9 +54,19 @@ const ProjectDetail = () => {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Tasks</CardTitle>
-          <CardDescription>All tasks associated with this project.</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Tasks</CardTitle>
+            <CardDescription>
+              All tasks associated with this project.
+            </CardDescription>
+          </div>
+          <CreateTaskDialog
+            onTaskCreated={handleTaskCreated}
+            projects={projects}
+            users={users}
+            defaultProjectId={projectId}
+          />
         </CardHeader>
         <CardContent>
           <Table>
@@ -69,7 +87,9 @@ const ProjectDetail = () => {
                     <TableCell className="font-medium">{task.title}</TableCell>
                     <TableCell>{task.status}</TableCell>
                     <TableCell>
-                      <Badge variant={getPriorityVariant(task.priority)}>{task.priority}</Badge>
+                      <Badge variant={getPriorityVariant(task.priority)}>
+                        {task.priority}
+                      </Badge>
                     </TableCell>
                     <TableCell>{task.dueDate}</TableCell>
                     <TableCell>
@@ -78,7 +98,9 @@ const ProjectDetail = () => {
                           <TooltipTrigger>
                             <Avatar>
                               <AvatarImage src={assignee.avatar} />
-                              <AvatarFallback>{assignee.name.charAt(0)}</AvatarFallback>
+                              <AvatarFallback>
+                                {assignee.name.charAt(0)}
+                              </AvatarFallback>
                             </Avatar>
                           </TooltipTrigger>
                           <TooltipContent>
