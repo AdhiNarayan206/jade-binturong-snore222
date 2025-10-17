@@ -51,10 +51,6 @@ const TeamWorkspaceLayout = () => {
 
   return (
     <div className="space-y-6">
-      <Link to="/teams" className={cn(buttonVariants({ variant: "outline" }), "mb-4")}>
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to All Teams
-      </Link>
       
       {loading ? (
         <div className="space-y-2">

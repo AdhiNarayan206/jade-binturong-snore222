@@ -22,22 +22,24 @@ import {
 } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { showError } from "@/utils/toast";
+import { TeamSelector } from "./TeamSelector";
+import { useTeamSelector } from "@/hooks/use-team-selector";
 
 const mainLinks = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  // Tasks link is removed from main links as MyTasks is now on the Dashboard
-];
-
-const workspaceLinks = [
-  { to: "/teams", label: "Teams", icon: Users },
-  // The following links now point to the Teams page, where the user selects a workspace
-  { to: "/teams", label: "Projects", icon: FolderKanban },
-  { to: "/teams", label: "Tasks", icon: ListTodo },
-  { to: "/teams", label: "Documents", icon: FileText },
-  { to: "/teams", label: "Contributions", icon: GitMerge },
 ];
 
 const Sidebar = () => {
+  const { selectedTeamId, loading: loadingTeams } = useTeamSelector();
+
+  const workspaceLinks = [
+    { to: "/teams", label: "Teams Overview", icon: Users },
+    { to: `/teams/${selectedTeamId}/projects`, label: "Projects", icon: FolderKanban, requiresTeam: true },
+    { to: `/teams/${selectedTeamId}/tasks`, label: "Tasks", icon: ListTodo, requiresTeam: true },
+    { to: `/teams/${selectedTeamId}/documents`, label: "Documents", icon: FileText, requiresTeam: true },
+    { to: `/teams/${selectedTeamId}/contributions`, label: "Contributions", icon: GitMerge, requiresTeam: true },
+  ];
+
   const handleLinkGitHub = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
@@ -93,22 +95,32 @@ const Sidebar = () => {
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-1 pl-3">
-            {workspaceLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) =>
-                  cn(
-                    buttonVariants({ variant: "ghost" }),
-                    "w-full justify-start text-sidebar-foreground hover:text-sidebar-accent-foreground",
-                    isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
-                  )
-                }
-              >
-                <link.icon className="mr-2 h-4 w-4" />
-                {link.label}
-              </NavLink>
-            ))}
+            <div className="px-3 pb-2">
+              <TeamSelector />
+            </div>
+            
+            {workspaceLinks.map((link) => {
+              const isDisabled = link.requiresTeam && !selectedTeamId;
+              const targetTo = isDisabled ? "/teams" : link.to;
+
+              return (
+                <NavLink
+                  key={link.to}
+                  to={targetTo}
+                  className={({ isActive }) =>
+                    cn(
+                      buttonVariants({ variant: "ghost" }),
+                      "w-full justify-start text-sidebar-foreground hover:text-sidebar-accent-foreground",
+                      (isActive && !isDisabled) && "bg-sidebar-accent text-sidebar-accent-foreground",
+                      isDisabled && "pointer-events-none opacity-50"
+                    )
+                  }
+                >
+                  <link.icon className="mr-2 h-4 w-4" />
+                  {link.label}
+                </NavLink>
+              );
+            })}
           </CollapsibleContent>
         </Collapsible>
       </nav>
