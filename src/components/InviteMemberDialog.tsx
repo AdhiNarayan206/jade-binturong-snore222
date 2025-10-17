@@ -36,17 +36,14 @@ export function InviteMemberDialog({ teamId, onMemberInvited }: InviteMemberDial
     setLoading(false);
 
     if (error) {
-      // The 'error' object from invoke is a FunctionsError.
-      // The actual error message from the function is in the 'context' property.
-      // We default to the generic message if the context is not available.
       const errorMessage = (error as any).context?.error?.message || error.message;
       showError(`Failed to send invitation: ${errorMessage}`);
       console.error("Edge function error details:", error);
     } else if (data.error) {
-      // This handles cases where the function returns a 200 OK status but includes an error in the response body.
       showError(`Failed to send invitation: ${data.error}`);
     } else {
-      showSuccess("Invitation sent successfully!");
+      const successMessage = data.message || "Invitation sent successfully!";
+      showSuccess(successMessage);
       onMemberInvited();
       setOpen(false);
       setEmail("");
