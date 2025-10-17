@@ -15,16 +15,27 @@ import {
   CartesianGrid,
 } from "recharts";
 import { Activity, CheckCircle, Clock } from "lucide-react";
-
-const contributionData = [
-  { name: "Alice", commits: 45 },
-  { name: "Bob", commits: 34 },
-  { name: "Charlie", commits: 52 },
-  { name: "David", commits: 22 },
-  { name: "Eve", commits: 61 },
-];
+import { projects, tasks, users } from "@/data/mockData";
+import { addDays, isAfter, isBefore } from "date-fns";
 
 const Dashboard = () => {
+  // Calculate stats from mock data
+  const activeProjects = projects.length;
+  const tasksCompleted = tasks.filter((task) => task.status === "Done").length;
+
+  const today = new Date();
+  const sevenDaysFromNow = addDays(today, 7);
+  const upcomingDeadlines = projects.filter((p) => {
+    const dueDate = new Date(p.dueDate);
+    return isAfter(dueDate, today) && isBefore(dueDate, sevenDaysFromNow);
+  }).length;
+
+  // Calculate task distribution for the chart
+  const taskDistribution = users.map(user => ({
+    name: user.name,
+    tasks: tasks.filter(task => task.assigneeId === user.id).length,
+  }));
+
   return (
     <div className="space-y-8">
       <div>
@@ -43,9 +54,9 @@ const Dashboard = () => {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5</div>
+            <div className="text-2xl font-bold">{activeProjects}</div>
             <p className="text-xs text-muted-foreground">
-              +2 from last month
+              Total projects being managed.
             </p>
           </CardContent>
         </Card>
@@ -57,9 +68,9 @@ const Dashboard = () => {
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">124</div>
+            <div className="text-2xl font-bold">{tasksCompleted}</div>
             <p className="text-xs text-muted-foreground">
-              +15 this week
+              Total tasks marked as done.
             </p>
           </CardContent>
         </Card>
@@ -71,9 +82,9 @@ const Dashboard = () => {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">{upcomingDeadlines}</div>
             <p className="text-xs text-muted-foreground">
-              In the next 7 days
+              In the next 7 days.
             </p>
           </CardContent>
         </Card>
@@ -81,17 +92,17 @@ const Dashboard = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Team Contributions</CardTitle>
-          <CardDescription>Commits in the last 30 days</CardDescription>
+          <CardTitle>Team Task Distribution</CardTitle>
+          <CardDescription>Number of tasks assigned to each team member.</CardDescription>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={contributionData}>
+            <BarChart data={taskDistribution}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="commits" fill="hsl(var(--primary))" />
+              <Bar dataKey="tasks" fill="hsl(var(--primary))" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
