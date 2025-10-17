@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CreateDocumentDialog } from "@/components/CreateDocumentDialog";
+import { UploadDocument } from "@/components/UploadDocument";
 
 const Documents = () => {
   const [documents, setDocuments] = useState<Document[]>(initialDocuments);
@@ -26,7 +27,10 @@ const Documents = () => {
             Collaborate on documents and track changes seamlessly.
           </p>
         </div>
-        <CreateDocumentDialog onDocumentCreated={handleDocumentCreated} />
+        <div className="flex items-center gap-2">
+          <UploadDocument onDocumentUploaded={handleDocumentCreated} />
+          <CreateDocumentDialog onDocumentCreated={handleDocumentCreated} />
+        </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {documents.map((doc) => (
