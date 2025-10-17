@@ -53,8 +53,17 @@ serve(async (req) => {
     })
 
     if (!githubResponse.ok) {
-      const errorData = await githubResponse.json()
-      throw new Error(`GitHub API error: ${errorData.message}`)
+      const errorData = await githubResponse.json().catch(() => ({ message: 'Unknown GitHub error' }));
+      
+      let errorMessage = `GitHub API error (${githubResponse.status}): ${errorData.message}`;
+      
+      if (githubResponse.status === 404) {
+        errorMessage = `Repository not found: ${repo}. Check the spelling or ensure it's linked correctly.`;
+      } else if (githubResponse.status === 403) {
+        errorMessage = `Permission denied (403). Ensure your GitHub account has access to ${repo} and you have re-linked your account with 'repo' scope.`;
+      }
+      
+      throw new Error(errorMessage);
     }
     const commits = await githubResponse.json()
 

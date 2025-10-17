@@ -29,7 +29,7 @@ serve(async (req) => {
     const { data: { session } } = await supabaseClient.auth.getSession()
 
     if (!session) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      return new Response(JSON.stringify({ error: 'Unauthorized: Session expired or missing.' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 401,
       })
@@ -52,10 +52,19 @@ serve(async (req) => {
     })
 
     if (!githubResponse.ok) {
-      const errorData = await githubResponse.json()
-      return new Response(JSON.stringify({ error: `GitHub API error: ${errorData.message}` }), {
+      const errorData = await githubResponse.json().catch(() => ({ message: 'Unknown GitHub error' }));
+      
+      let errorMessage = `GitHub API error (${githubResponse.status}): ${errorData.message}`;
+      
+      if (githubResponse.status === 404) {
+        errorMessage = `Repository not found: ${repo}. Check the spelling or ensure it's linked correctly.`;
+      } else if (githubResponse.status === 403) {
+        errorMessage = `Permission denied (403). Ensure your GitHub account has access to ${repo} and you have re-linked your account with 'repo' scope.`;
+      }
+
+      return new Response(JSON.stringify({ error: errorMessage }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: githubResponse.status,
+        status: 400, // Return 400 to client as per standard practice for function errors
       })
     }
 
