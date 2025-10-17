@@ -11,6 +11,7 @@ import Contributions from "./pages/Contributions";
 import Documents from "./pages/Documents";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import ProjectDetail from "./pages/ProjectDetail";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/projects" element={<Projects />} />
+            <Route path="/projects/:projectId" element={<ProjectDetail />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/contributions" element={<Contributions />} />
             <Route path="/documents" element={<Documents />} />
