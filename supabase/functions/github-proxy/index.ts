@@ -37,7 +37,7 @@ serve(async (req) => {
 
     const providerToken = session.provider_token
     if (!providerToken) {
-      return new Response(JSON.stringify({ error: 'GitHub provider token not found. Please re-authenticate.' }), {
+      return new Response(JSON.stringify({ error: 'GitHub account not linked. Please link your GitHub account via the sidebar.' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 403,
       })

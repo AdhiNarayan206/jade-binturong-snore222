@@ -41,7 +41,7 @@ serve(async (req) => {
 
     const { data: { session } } = await supabaseClient.auth.getSession()
     if (!session || !session.provider_token) {
-      throw new Error('GitHub provider token not found. Please re-link your GitHub account.')
+      throw new Error('GitHub account not linked. Please link your GitHub account via the sidebar.')
     }
     const providerToken = session.provider_token
 
