@@ -74,7 +74,7 @@ const TeamDetail = () => {
     if (membersError) {
       showError("Failed to fetch team members: " + membersError.message);
     } else {
-      setMembers(membersData || []);
+      setMembers(membersData as any || []);
     }
 
     // Check if current user is an admin

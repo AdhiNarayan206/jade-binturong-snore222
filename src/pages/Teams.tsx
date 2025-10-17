@@ -57,7 +57,7 @@ const Teams = () => {
     if (invitesError) {
       showError("Failed to fetch invitations: " + invitesError.message);
     } else {
-      setInvitations(invitesData || []);
+      setInvitations(invitesData as any || []);
     }
 
     setLoading(false);
