@@ -102,13 +102,54 @@ export let documents: Document[] = [
   {
     id: "doc-1",
     title: "Project Charter: UI Redesign",
-    content: "This document outlines the scope, objectives, and participants of the UI Redesign project.",
+    content: `
+# Project Charter: UI Redesign
+
+This document outlines the scope, objectives, and participants of the UI Redesign project.
+
+## 1. Project Goals
+- Enhance user experience
+- Modernize the UI
+- Improve accessibility
+
+## 2. Scope
+The project will cover the following areas:
+- Dashboard
+- Project pages
+- Task management interface
+
+## 3. Team
+| Role | Name |
+|---|---|
+| Project Manager | Alice |
+| Lead Designer | Bob |
+| Lead Developer | Charlie |
+`,
     lastModified: "2024-07-20",
   },
   {
     id: "doc-2",
     title: "API Integration Specifications",
-    content: "Technical specifications for integrating the GitHub API.",
+    content: `
+# API Integration Specifications
+
+Technical specifications for integrating the GitHub API.
+
+## Endpoints
+- \`GET /repos/{owner}/{repo}/commits\` - Fetches commits
+- \`GET /user\` - Fetches authenticated user data
+
+## Authentication
+Authentication is handled via OAuth 2.0. The user's \`provider_token\` must be used in the \`Authorization\` header.
+
+\`\`\`javascript
+const response = await fetch('https://api.github.com/user', {
+  headers: {
+    Authorization: \`token \${providerToken}\`
+  }
+});
+\`\`\`
+`,
     lastModified: "2024-07-18",
   },
 ];

@@ -13,6 +13,7 @@ import Documents from "./pages/Documents";
 import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
 import ProjectDetail from "./pages/ProjectDetail";
+import DocumentDetail from "./pages/DocumentDetail";
 import { ThemeProvider } from "./components/theme-provider";
 import { supabase } from "./integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
@@ -60,6 +61,7 @@ const App = () => {
                 <Route path="/tasks" element={<Tasks />} />
                 <Route path="/contributions" element={<Contributions />} />
                 <Route path="/documents" element={<Documents />} />
+                <Route path="/documents/:documentId" element={<DocumentDetail />} />
                 <Route path="/account" element={<Account />} />
               </Route>
               <Route path="*" element={<NotFound />} />

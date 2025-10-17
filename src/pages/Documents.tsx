@@ -1,9 +1,9 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { documents as initialDocuments, Document } from "@/data/mockData";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -30,21 +30,27 @@ const Documents = () => {
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {documents.map((doc) => (
-          <Card key={doc.id}>
-            <CardHeader>
-              <CardTitle>{doc.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground line-clamp-3">
-                {doc.content}
-              </p>
-            </CardContent>
-            <CardFooter>
-              <p className="text-xs text-muted-foreground">
-                Last modified: {doc.lastModified}
-              </p>
-            </CardFooter>
-          </Card>
+          <Link
+            to={`/documents/${doc.id}`}
+            key={doc.id}
+            className="block hover:shadow-lg transition-shadow rounded-lg"
+          >
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle>{doc.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground line-clamp-3">
+                  {doc.content}
+                </p>
+              </CardContent>
+              <CardFooter>
+                <p className="text-xs text-muted-foreground">
+                  Last modified: {doc.lastModified}
+                </p>
+              </CardFooter>
+            </Card>
+          </Link>
         ))}
       </div>
     </div>
