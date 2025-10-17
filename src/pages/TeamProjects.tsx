@@ -51,14 +51,14 @@ const TeamProjects = () => {
         <div>
           <h2 className="text-2xl font-bold">Projects</h2>
           <p className="text-muted-foreground">
-            Create, view, and manage projects for this team.
+            Create, view, and manage projects.
           </p>
         </div>
         <CreateProjectDialog onProjectCreated={handleProjectCreated} />
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Team Projects</CardTitle>
+          <CardTitle>Project List</CardTitle>
           <CardDescription>A list of all projects managed by this team.</CardDescription>
         </CardHeader>
         <CardContent>

@@ -49,7 +49,7 @@ const TeamContributionsPage = () => {
       <div>
         <h2 className="text-2xl font-bold">Contributions</h2>
         <p className="text-muted-foreground">
-          Monitor team contributions from the integrated GitHub repository.
+          Monitor contributions from the integrated GitHub repository.
         </p>
       </div>
 
@@ -68,7 +68,7 @@ const TeamContributionsPage = () => {
           <CardHeader>
             <CardTitle>GitHub Repository Required</CardTitle>
             <CardDescription>
-              Please link a GitHub repository above to start tracking contributions for this team.
+              Please link a GitHub repository above to start tracking contributions.
             </CardDescription>
           </CardHeader>
           <CardContent>

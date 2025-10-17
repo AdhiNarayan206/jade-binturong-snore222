@@ -34,7 +34,7 @@ const TeamDocuments = () => {
         <div>
           <h2 className="text-2xl font-bold">Documents</h2>
           <p className="text-muted-foreground">
-            Collaborate on documents for this team.
+            Collaborate on documents.
           </p>
         </div>
         <div className="flex items-center gap-2">
