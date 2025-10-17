@@ -5,7 +5,6 @@ import {
   ListTodo,
   GitMerge,
   FileText,
-  Settings,
   Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -17,7 +16,6 @@ const links = [
   { to: "/tasks", label: "Tasks", icon: ListTodo },
   { to: "/contributions", label: "Contributions", icon: GitMerge },
   { to: "/documents", label: "Documents", icon: FileText },
-  { to: "/account", label: "Account", icon: Settings },
 ];
 
 const Sidebar = () => {
