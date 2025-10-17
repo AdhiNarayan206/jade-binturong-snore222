@@ -15,12 +15,9 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { useTheme } from "@/components/theme-provider";
 import { Switch } from "@/components/ui/switch";
 
 const Settings = () => {
-  const { setTheme } = useTheme();
-
   return (
     <div className="space-y-4">
       <div>
@@ -32,7 +29,6 @@ const Settings = () => {
       <Tabs defaultValue="profile" className="w-full">
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
         </TabsList>
         <TabsContent value="profile">
@@ -56,29 +52,6 @@ const Settings = () => {
             <CardFooter>
               <Button>Save changes</Button>
             </CardFooter>
-          </Card>
-        </TabsContent>
-        <TabsContent value="appearance">
-          <Card>
-            <CardHeader>
-              <CardTitle>Appearance</CardTitle>
-              <CardDescription>
-                Customize the look and feel of the application.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-1">
-                <Label>Theme</Label>
-                <p className="text-sm text-muted-foreground">
-                  Select the theme for the dashboard.
-                </p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" onClick={() => setTheme("light")}>Light</Button>
-                <Button variant="outline" onClick={() => setTheme("dark")}>Dark</Button>
-                <Button variant="outline" onClick={() => setTheme("system")}>System</Button>
-              </div>
-            </CardContent>
           </Card>
         </TabsContent>
         <TabsContent value="notifications">
