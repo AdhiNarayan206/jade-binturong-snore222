@@ -15,6 +15,7 @@ import { showSuccess, showError } from "@/utils/toast";
 import { Session, User } from "@supabase/supabase-js";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ResendTestCard } from "@/components/ResendTestCard";
 
 const Account = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -231,6 +232,8 @@ const Account = () => {
           </CardFooter>
         </form>
       </Card>
+
+      <ResendTestCard />
     </div>
   );
 };
