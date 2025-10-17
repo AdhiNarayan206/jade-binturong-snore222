@@ -17,6 +17,7 @@ import { showError } from "@/utils/toast";
 const TeamWorkspaceLayout = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const [teamName, setTeamName] = useState("Loading Team...");
+  const [teamDescription, setTeamDescription] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,8 +34,10 @@ const TeamWorkspaceLayout = () => {
       if (error) {
         showError("Failed to load team details: " + error.message);
         setTeamName("Team Not Found");
+        setTeamDescription("");
       } else if (data) {
         setTeamName(data.name);
+        setTeamDescription(data.description || `Resources for the ${data.name} team.`);
       }
       setLoading(false);
     };
@@ -52,12 +55,12 @@ const TeamWorkspaceLayout = () => {
         </div>
       ) : (
         <div>
-          <h1 className="text-4xl font-extrabold tracking-tight">{teamName} Workspace</h1>
-          <p className="text-muted-foreground">Manage projects, tasks, and documents for the {teamName} team.</p>
+          <h1 className="text-4xl font-extrabold tracking-tight">{teamName}</h1>
+          <p className="text-muted-foreground">{teamDescription}</p>
         </div>
       )}
 
-      {/* The main content area now takes up the full width */}
+      {/* The main content area */}
       <div className="flex-1">
         <Outlet />
       </div>
