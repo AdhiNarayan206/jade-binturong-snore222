@@ -5,18 +5,10 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
 import { Activity, CheckCircle, Clock } from "lucide-react";
-import { projects, tasks, users } from "@/data/mockData";
+import { projects, tasks } from "@/data/mockData";
 import { addDays, isAfter, isBefore } from "date-fns";
+import { TeamContributionChart } from "@/components/TeamContributionChart";
 
 const Dashboard = () => {
   // Calculate stats from mock data
@@ -29,12 +21,6 @@ const Dashboard = () => {
     const dueDate = new Date(p.dueDate);
     return isAfter(dueDate, today) && isBefore(dueDate, sevenDaysFromNow);
   }).length;
-
-  // Calculate task distribution for the chart
-  const taskDistribution = users.map(user => ({
-    name: user.name,
-    tasks: tasks.filter(task => task.assigneeId === user.id).length,
-  }));
 
   return (
     <div className="space-y-8">
@@ -90,23 +76,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Team Task Distribution</CardTitle>
-          <CardDescription>Number of tasks assigned to each team member.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={taskDistribution}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="tasks" fill="hsl(var(--primary))" />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      <TeamContributionChart />
     </div>
   );
 };
