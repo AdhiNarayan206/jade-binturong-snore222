@@ -15,11 +15,14 @@ import { ArrowLeft, User, Shield } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { InviteMemberDialog } from "@/components/InviteMemberDialog";
+import { UpdateTeamRepoForm } from "@/components/UpdateTeamRepoForm";
+import { TeamContributions } from "@/components/TeamContributions";
 
 type Team = {
   id: string;
   name: string;
   description: string | null;
+  github_repo: string | null;
 };
 
 type Member = {
@@ -46,7 +49,7 @@ const TeamDetail = () => {
     // Fetch team details
     const { data: teamData, error: teamError } = await supabase
       .from("teams")
-      .select("id, name, description")
+      .select("id, name, description, github_repo")
       .eq("id", teamId)
       .single();
 
@@ -74,7 +77,7 @@ const TeamDetail = () => {
     if (membersError) {
       showError("Failed to fetch team members: " + membersError.message);
     } else {
-      setMembers(membersData as any || []);
+      setMembers((membersData as any) || []);
     }
 
     // Check if current user is an admin
@@ -166,6 +169,18 @@ const TeamDetail = () => {
           </div>
         </CardContent>
       </Card>
+
+      {team.github_repo && (
+        <TeamContributions teamId={team.id} isAdmin={isAdmin} />
+      )}
+
+      {isAdmin && (
+        <UpdateTeamRepoForm
+          teamId={team.id}
+          currentRepo={team.github_repo}
+          onRepoUpdated={fetchData}
+        />
+      )}
     </div>
   );
 };
