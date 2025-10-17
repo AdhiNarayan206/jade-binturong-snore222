@@ -80,6 +80,7 @@ serve(async (req) => {
     if (membersError) throw membersError
     const memberIds = teamMembers.map(m => m.user_id).filter(id => id) as string[]
 
+    // Fetch users in batches if necessary, but for now, list all and filter
     const { data: { users }, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
     if (usersError) throw usersError;
 
@@ -132,6 +133,7 @@ serve(async (req) => {
     })
 
   } catch (error) {
+    console.error("Sync GitHub Contributions Error:", error.message)
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
