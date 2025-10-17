@@ -36,10 +36,17 @@ export function InviteMemberDialog({ teamId, onMemberInvited }: InviteMemberDial
     setLoading(false);
 
     if (error) {
-      const errorMessage = (error as any).context?.error?.message || error.message;
-      showError(`Failed to send invitation: ${errorMessage}`);
+      // The edge function returns a JSON with an 'error' key on failure.
+      // The Supabase client puts this JSON response into the 'context' property of the error object.
+      const functionError = (error as any).context?.error;
+      
+      // If we have a specific error from the function, use it. Otherwise, use the generic client error message.
+      const detailedMessage = functionError || error.message;
+
+      showError(`Failed to send invitation: ${detailedMessage}`);
       console.error("Edge function error details:", error);
     } else if (data.error) {
+      // This handles cases where the function returns 200 OK but includes an error in the body.
       showError(`Failed to send invitation: ${data.error}`);
     } else {
       const successMessage = data.message || "Invitation sent successfully!";
