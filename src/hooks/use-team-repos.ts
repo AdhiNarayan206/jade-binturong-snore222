@@ -22,10 +22,13 @@ export function useTeamRepos() {
         .not("github_repo", "is", null); // Only select teams that have a repo set
 
       if (error) {
+        console.error("Supabase Error fetching team repositories:", error);
         showError("Failed to fetch team repositories: " + error.message);
         setLoading(false);
         return;
       }
+
+      console.log("Fetched team data:", data);
 
       // Extract unique repository names
       const uniqueRepos = Array.from(new Set(
