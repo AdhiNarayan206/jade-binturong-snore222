@@ -41,6 +41,8 @@ const Sidebar = () => {
       provider: 'github',
       options: {
         redirectTo: window.location.origin,
+        // Request the 'repo' scope to allow reading commit history
+        scopes: 'repo', 
       },
     });
     if (error) {
