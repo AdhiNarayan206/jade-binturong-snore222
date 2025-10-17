@@ -1,4 +1,4 @@
-import { Outlet, useParams, NavLink, Link } from "react-router-dom";
+import { Outlet, useParams } from "react-router-dom";
 import {
   FolderKanban,
   ListTodo,
@@ -42,13 +42,6 @@ const TeamWorkspaceLayout = () => {
     fetchTeamName();
   }, [teamId]);
 
-  const navLinks = [
-    { to: `/teams/${teamId}/projects`, label: "Projects", icon: FolderKanban },
-    { to: `/teams/${teamId}/tasks`, label: "Tasks", icon: ListTodo },
-    { to: `/teams/${teamId}/documents`, label: "Documents", icon: FileText },
-    { to: `/teams/${teamId}/contributions`, label: "Contributions", icon: GitMerge },
-  ];
-
   return (
     <div className="space-y-6">
       
@@ -64,35 +57,9 @@ const TeamWorkspaceLayout = () => {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-6">
-        <Card className="w-full md:w-64 shrink-0">
-          <CardHeader>
-            <CardTitle className="text-lg">Navigation</CardTitle>
-            <CardDescription>Team specific resources</CardDescription>
-          </CardHeader>
-          <CardContent className="p-2 space-y-1">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) =>
-                  cn(
-                    buttonVariants({ variant: "ghost" }),
-                    "w-full justify-start text-foreground",
-                    isActive && "bg-accent text-accent-foreground"
-                  )
-                }
-              >
-                <link.icon className="mr-2 h-4 w-4" />
-                {link.label}
-              </NavLink>
-            ))}
-          </CardContent>
-        </Card>
-        
-        <div className="flex-1">
-          <Outlet />
-        </div>
+      {/* The main content area now takes up the full width */}
+      <div className="flex-1">
+        <Outlet />
       </div>
     </div>
   );
