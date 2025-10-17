@@ -14,8 +14,13 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  let teamId, email;
+
   try {
-    const { teamId, email } = await req.json()
+    const body = await req.json()
+    teamId = body.teamId;
+    email = body.email;
+
     if (!teamId || !email) {
       throw new Error("Team ID and email are required.")
     }
@@ -26,7 +31,6 @@ serve(async (req) => {
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     )
 
-    // Get inviter's data and check for a valid session
     const { data: { user: inviter } } = await supabaseClient.auth.getUser()
     if (!inviter) {
       throw new Error("Authentication error. Your session may have expired. Please log in again.")
@@ -35,7 +39,6 @@ serve(async (req) => {
     const { data: inviterProfile } = await supabaseClient.from('profiles').select('full_name').eq('id', inviter.id).single()
     const inviterName = inviterProfile?.full_name || inviter.email
 
-    // Get team name and check if inviter is an admin
     const { data: team, error: teamError } = await supabaseClient
       .from('teams')
       .select('name')
@@ -50,13 +53,11 @@ serve(async (req) => {
       throw new Error('Permission denied. You must be an admin to invite members.')
     }
 
-    // Use the admin client for user management
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Find or invite the user by email
     let userId;
     const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserByEmail(email)
     
@@ -72,7 +73,6 @@ serve(async (req) => {
         userId = userData.user.id
     }
 
-    // Check if user is already a member
     const { data: existingMember } = await supabaseAdmin
       .from('team_members')
       .select('id, status')
@@ -84,15 +84,16 @@ serve(async (req) => {
       throw new Error('This user is already a member or has a pending invitation.')
     }
 
-    // Insert a pending invitation record
-    const { error: insertError } = await supabaseAdmin
+    const { data: insertedInvitation, error: insertError } = await supabaseAdmin
       .from('team_members')
       .insert({ team_id: teamId, user_id: userId, status: 'pending', role: 'Member' })
-    if (insertError) throw new Error(`Database error: Could not add member to team.`)
+      .select('id')
+      .single()
 
-    // Send email notification via Resend
+    if (insertError) throw new Error(`Database error: Could not add member to team. ${insertError.message}`)
+
     const projectRef = Deno.env.get('SUPABASE_URL')?.split('.')[0].replace('https://', '')
-    const siteUrl = `https://${projectRef}.vercel.app` // Assumes Vercel deployment convention
+    const siteUrl = `https://${projectRef}.vercel.app`
     const invitationUrl = `${siteUrl}/teams`
 
     const subject = `You're invited to join the ${teamName} team on CollabMate!`
@@ -109,12 +110,21 @@ serve(async (req) => {
       </body></html>
     `
 
-    await resend.emails.send({
-      from: 'CollabMate <onboarding@resend.dev>',
-      to: email,
-      subject: subject,
-      html: body,
-    })
+    try {
+      await resend.emails.send({
+        from: 'CollabMate <onboarding@resend.dev>',
+        to: email,
+        subject: subject,
+        html: body,
+      })
+    } catch (resendError) {
+      console.error('Resend API Error:', resendError);
+      // Roll back the database insert if the email fails
+      if (insertedInvitation) {
+        await supabaseAdmin.from('team_members').delete().eq('id', insertedInvitation.id);
+      }
+      throw new Error(`Failed to send email via Resend. The invitation has been cancelled. Details: ${resendError.message}`);
+    }
 
     return new Response(JSON.stringify({ message: 'Invitation sent successfully.' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
