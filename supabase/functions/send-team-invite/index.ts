@@ -7,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// IMPORTANT: You need to add your Resend API key as a secret in your Supabase project.
+// The RESEND_API_KEY must be set as a secret in your Supabase project settings for this function.
 const resend = new Resend(Deno.env.get('RESEND_API_KEY') ?? '')
 
 serve(async (req) => {
