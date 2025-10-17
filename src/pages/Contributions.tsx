@@ -103,9 +103,9 @@ const Contributions = () => {
               </SelectTrigger>
               <SelectContent>
                 {loadingRepos ? (
-                  <SelectItem value="" disabled>Loading repositories...</SelectItem>
+                  <SelectItem value="loading-placeholder" disabled>Loading repositories...</SelectItem>
                 ) : repos.length === 0 ? (
-                  <SelectItem value="" disabled>No repositories linked to your teams.</SelectItem>
+                  <SelectItem value="no-repos-placeholder" disabled>No repositories linked to your teams.</SelectItem>
                 ) : (
                   repos.map((repoName) => (
                     <SelectItem key={repoName} value={repoName}>
