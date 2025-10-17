@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -20,6 +20,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { supabase } from "@/integrations/supabase/client";
+import { showError } from "@/utils/toast";
 
 const mainLinks = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -34,6 +36,18 @@ const workspaceLinks = [
 ];
 
 const Sidebar = () => {
+  const handleLinkGitHub = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+    if (error) {
+      showError(`Could not link GitHub account: ${error.message}`);
+    }
+  };
+
   return (
     <aside className="hidden md:flex md:flex-col md:w-64 bg-sidebar border-r border-sidebar-border shrink-0">
       <div className="p-2 border-b border-sidebar-border">
@@ -95,14 +109,18 @@ const Sidebar = () => {
         </Collapsible>
       </nav>
       <div className="p-2 mt-auto border-t border-sidebar-border space-y-1">
-        <Button variant="ghost" className="w-full justify-start text-sidebar-foreground">
-          <Plus className="mr-2 h-4 w-4" /> Invite people
+        <Button asChild variant="ghost" className="w-full justify-start text-sidebar-foreground">
+          <Link to="/teams">
+            <Plus className="mr-2 h-4 w-4" /> Invite people
+          </Link>
         </Button>
-        <Button variant="ghost" className="w-full justify-start text-sidebar-foreground">
+        <Button variant="ghost" className="w-full justify-start text-sidebar-foreground" onClick={handleLinkGitHub}>
           <Github className="mr-2 h-4 w-4" /> Link GitHub
         </Button>
-        <Button variant="ghost" className="w-full justify-start text-sidebar-foreground">
-          <HelpCircle className="mr-2 h-4 w-4" /> Help
+        <Button asChild variant="ghost" className="w-full justify-start text-sidebar-foreground">
+          <a href="https://www.dyad.sh/" target="_blank" rel="noopener noreferrer">
+            <HelpCircle className="mr-2 h-4 w-4" /> Help
+          </a>
         </Button>
       </div>
     </aside>
