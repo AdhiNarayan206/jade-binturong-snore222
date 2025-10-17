@@ -27,13 +27,13 @@ import { useTeamSelector } from "@/hooks/use-team-selector";
 
 const mainLinks = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/teams", label: "Teams Overview", icon: Users },
 ];
 
 const Sidebar = () => {
   const { selectedTeamId, loading: loadingTeams } = useTeamSelector();
 
   const workspaceLinks = [
-    { to: "/teams", label: "Teams Overview", icon: Users },
     { to: `/teams/${selectedTeamId}/projects`, label: "Projects", icon: FolderKanban, requiresTeam: true },
     { to: `/teams/${selectedTeamId}/tasks`, label: "Tasks", icon: ListTodo, requiresTeam: true },
     { to: `/teams/${selectedTeamId}/documents`, label: "Documents", icon: FileText, requiresTeam: true },
