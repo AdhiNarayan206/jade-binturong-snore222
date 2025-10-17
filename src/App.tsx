@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
@@ -17,37 +16,52 @@ import DocumentDetail from "./pages/DocumentDetail";
 import Teams from "./pages/Teams";
 import TeamDetail from "./pages/TeamDetail";
 import { ThemeProvider } from "./components/theme-provider";
-import { supabase } from "./integrations/supabase/client";
-import type { Session } from "@supabase/supabase-js";
 import Login from "./pages/Login";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  const [session, setSession] = useState<Session | null>(null);
+const AppRoutes = () => {
+  const { session, loading } = useAuth();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  if (!session) {
+  if (loading) {
     return (
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <Login />
-      </ThemeProvider>
+      <div className="flex h-screen items-center justify-center">
+        <p>Loading...</p>
+      </div>
     );
   }
 
+  return (
+    <Routes>
+      {!session ? (
+        <>
+          <Route path="/login" element={<Login />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </>
+      ) : (
+        <>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/projects/:projectId" element={<ProjectDetail />} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/teams" element={<Teams />} />
+            <Route path="/teams/:teamId" element={<TeamDetail />} />
+            <Route path="/contributions" element={<Contributions />} />
+            <Route path="/documents" element={<Documents />} />
+            <Route path="/documents/:documentId" element={<DocumentDetail />} />
+            <Route path="/account" element={<Account />} />
+          </Route>
+          <Route path="/login" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFound />} />
+        </>
+      )}
+    </Routes>
+  );
+};
+
+const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -55,21 +69,9 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route element={<Layout />}>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/projects/:projectId" element={<ProjectDetail />} />
-                <Route path="/tasks" element={<Tasks />} />
-                <Route path="/teams" element={<Teams />} />
-                <Route path="/teams/:teamId" element={<TeamDetail />} />
-                <Route path="/contributions" element={<Contributions />} />
-                <Route path="/documents" element={<Documents />} />
-                <Route path="/documents/:documentId" element={<DocumentDetail />} />
-                <Route path="/account" element={<Account />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AuthProvider>
+              <AppRoutes />
+            </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
