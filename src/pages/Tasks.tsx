@@ -1,13 +1,6 @@
 import { useState } from "react";
 import { tasks as initialTasks, projects, users, Task } from "@/data/mockData";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Table,
   TableBody,
   TableCell,
@@ -25,6 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { CreateTaskDialog } from "@/components/CreateTaskDialog";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Tasks = () => {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
@@ -50,88 +44,82 @@ const Tasks = () => {
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 flex flex-col h-full">
+      <header className="flex justify-between items-center pb-4 border-b border-border">
         <div>
-          <h1 className="text-3xl font-bold">Tasks</h1>
+          <h1 className="text-2xl font-bold">Tasks</h1>
           <p className="text-muted-foreground">
             Track and manage all tasks across your projects.
           </p>
         </div>
-        <CreateTaskDialog
-          onTaskCreated={handleTaskCreated}
-          projects={projects}
-          users={users}
-        />
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Filter tasks..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="max-w-sm"
+          />
+          <CreateTaskDialog
+            onTaskCreated={handleTaskCreated}
+            projects={projects}
+            users={users}
+          />
+          <ThemeToggle />
+        </div>
+      </header>
+      
+      <div className="flex-1">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent border-b border-border">
+              <TableHead>Title</TableHead>
+              <TableHead>Project</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Priority</TableHead>
+              <TableHead>Due Date</TableHead>
+              <TableHead>Assignee</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredTasks.map((task) => {
+              const assignee = getAssignee(task.assigneeId);
+              const project = getProject(task.projectId);
+              return (
+                <TableRow key={task.id} className="border-b-0 hover:bg-accent">
+                  <TableCell className="font-medium">{task.title}</TableCell>
+                  <TableCell>{project?.name || "N/A"}</TableCell>
+                  <TableCell>{task.status}</TableCell>
+                  <TableCell>
+                    <Badge variant={getPriorityVariant(task.priority)}>
+                      {task.priority}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{task.dueDate}</TableCell>
+                  <TableCell>
+                    {assignee && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage src={assignee.avatar} />
+                              <AvatarFallback>
+                                {assignee.name.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{assignee.name}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>All Tasks</CardTitle>
-          <CardDescription>
-            A list of all tasks in your workspace.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4">
-            <Input
-              placeholder="Filter tasks by title..."
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="max-w-sm"
-            />
-          </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Project</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead>Assignee</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTasks.map((task) => {
-                const assignee = getAssignee(task.assigneeId);
-                const project = getProject(task.projectId);
-                return (
-                  <TableRow key={task.id}>
-                    <TableCell className="font-medium">{task.title}</TableCell>
-                    <TableCell>{project?.name || "N/A"}</TableCell>
-                    <TableCell>{task.status}</TableCell>
-                    <TableCell>
-                      <Badge variant={getPriorityVariant(task.priority)}>
-                        {task.priority}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{task.dueDate}</TableCell>
-                    <TableCell>
-                      {assignee && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <Avatar>
-                                <AvatarImage src={assignee.avatar} />
-                                <AvatarFallback>
-                                  {assignee.name.charAt(0)}
-                                </AvatarFallback>
-                              </Avatar>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>{assignee.name}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
     </div>
   );
 };
