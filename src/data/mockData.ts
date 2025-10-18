@@ -193,3 +193,32 @@ export const addDocument = (doc: Omit<Document, 'id' | 'lastModified'>) => {
   documents = [...documents, newDocument];
   return newDocument;
 }
+
+// Functions to update items
+export const updateProject = (updatedProject: Project) => {
+  projects = projects.map(p => p.id === updatedProject.id ? updatedProject : p);
+  return updatedProject;
+}
+
+export const updateTask = (updatedTask: Task) => {
+  tasks = tasks.map(t => t.id === updatedTask.id ? updatedTask : t);
+  return updatedTask;
+}
+
+export const updateDocument = (updatedDocument: Document) => {
+  documents = documents.map(d => d.id === updatedDocument.id ? updatedDocument : d);
+  return updatedDocument;
+}
+
+// Functions to delete items
+export const deleteProject = (projectId: string) => {
+  projects = projects.filter(p => p.id !== projectId);
+}
+
+export const deleteTask = (taskId: string) => {
+  tasks = tasks.filter(t => t.id !== taskId);
+}
+
+export const deleteDocument = (documentId: string) => {
+  documents = documents.filter(d => d.id !== documentId);
+}
