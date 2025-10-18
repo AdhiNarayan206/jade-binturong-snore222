@@ -33,12 +33,12 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
+        <Card className="group hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Active Projects
             </CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <Activity className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6 group-active:scale-95" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{activeProjects}</div>
@@ -47,12 +47,12 @@ const Dashboard = () => {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="group hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Tasks Completed
             </CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <CheckCircle className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110 group-hover:-rotate-12 group-active:scale-95" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{tasksCompleted}</div>
@@ -61,12 +61,12 @@ const Dashboard = () => {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="group hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Upcoming Deadlines
             </CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:scale-110 group-hover:rotate-12 group-active:scale-95" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{upcomingDeadlines}</div>

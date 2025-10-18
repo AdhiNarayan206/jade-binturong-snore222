@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { InviteMemberDialog } from "@/components/InviteMemberDialog";
 import { UpdateTeamRepoForm } from "@/components/UpdateTeamRepoForm";
 import { TeamContributions } from "@/components/TeamContributions";
+import { DeleteTeamDialog } from "@/components/DeleteTeamDialog";
 
 type Team = {
   id: string;
@@ -180,6 +181,28 @@ const TeamDetail = () => {
           currentRepo={team.github_repo}
           onRepoUpdated={fetchData}
         />
+      )}
+
+      {isAdmin && (
+        <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle className="text-destructive">Danger Zone</CardTitle>
+            <CardDescription>
+              Irreversible and destructive actions for this team.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Delete this team</p>
+                <p className="text-sm text-muted-foreground">
+                  Once deleted, the team and all associated data will be permanently removed.
+                </p>
+              </div>
+              <DeleteTeamDialog teamId={team.id} teamName={team.name} />
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

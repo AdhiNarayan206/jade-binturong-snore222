@@ -29,31 +29,31 @@ export function InviteMemberDialog({ teamId, onMemberInvited }: InviteMemberDial
     e.preventDefault();
     setLoading(true);
 
-    const { data, error } = await supabase.functions.invoke('send-team-invite', {
-      body: { teamId, email },
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('send-team-invite', {
+        body: { teamId, email },
+      });
 
-    setLoading(false);
+      if (error) {
+        showError(`Failed to send invitation: ${error.message}`);
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
-      // The edge function returns a JSON with an 'error' key on failure.
-      // The Supabase client puts this JSON response into the 'context' property of the error object.
-      const functionError = (error as any).context?.error;
-      
-      // If we have a specific error from the function, use it. Otherwise, use the generic client error message.
-      const detailedMessage = functionError || error.message;
+      if (data?.error) {
+        showError(data.error);
+        setLoading(false);
+        return;
+      }
 
-      showError(`Failed to send invitation: ${detailedMessage}`);
-      console.error("Edge function error details:", error);
-    } else if (data.error) {
-      // This handles cases where the function returns 200 OK but includes an error in the body.
-      showError(`Failed to send invitation: ${data.error}`);
-    } else {
-      const successMessage = data.message || "Invitation sent successfully!";
-      showSuccess(successMessage);
+      showSuccess("Invitation sent! The user can accept it on the Teams page.");
       onMemberInvited();
       setOpen(false);
       setEmail("");
+    } catch (err) {
+      showError(`Failed to send invitation: ${(err as Error).message}`);
+    } finally {
+      setLoading(false);
     }
   };
 

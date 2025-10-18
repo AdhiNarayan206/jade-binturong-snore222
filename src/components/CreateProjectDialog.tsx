@@ -12,18 +12,27 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { addProject, Project } from "@/data/mockData";
 import { showSuccess } from "@/utils/toast";
 
 interface CreateProjectDialogProps {
+  teamId: string;
   onProjectCreated: (newProject: Project) => void;
 }
 
-export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogProps) {
+export function CreateProjectDialog({ teamId, onProjectCreated }: CreateProjectDialogProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [status, setStatus] = useState<Project["status"]>("On Track");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +40,8 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
       name,
       description,
       dueDate,
-      status: "On Track",
+      status,
+      teamId,
     });
     onProjectCreated(newProject);
     showSuccess("Project created successfully!");
@@ -40,6 +50,7 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
     setName("");
     setDescription("");
     setDueDate("");
+    setStatus("On Track");
   };
 
   return (
@@ -73,6 +84,21 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
                 Due Date
               </Label>
               <Input id="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="col-span-3" required />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="status" className="text-right">
+                Status
+              </Label>
+              <Select value={status} onValueChange={(value: Project["status"]) => setStatus(value)}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="On Track">On Track</SelectItem>
+                  <SelectItem value="At Risk">At Risk</SelectItem>
+                  <SelectItem value="Off Track">Off Track</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>

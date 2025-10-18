@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Task } from "@/data/mockData";
 import {
   Dialog,
   DialogContent,
@@ -7,8 +7,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -21,10 +21,9 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import { addTask, Task, Project } from "@/data/mockData";
-import { showSuccess, showError } from "@/utils/toast";
-import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 
 type TeamMember = {
@@ -34,35 +33,44 @@ type TeamMember = {
   } | null;
 };
 
-interface CreateTaskDialogProps {
-  onTaskCreated: (newTask: Task) => void;
-  projects: Project[];
+interface EditTaskDialogProps {
+  task: Task;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onTaskUpdated: (updatedTask: Task) => void;
+  projects: Array<{ id: string; name: string }>;
   teamId?: string;
-  defaultProjectId?: string;
 }
 
-export function CreateTaskDialog({
-  onTaskCreated,
+export function EditTaskDialog({
+  task,
+  open,
+  onOpenChange,
+  onTaskUpdated,
   projects,
   teamId,
-  defaultProjectId,
-}: CreateTaskDialogProps) {
+}: EditTaskDialogProps) {
   const { user } = useAuth();
-  const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [projectId, setProjectId] = useState(defaultProjectId || "");
-  const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
-  const [dueDate, setDueDate] = useState("");
-  const [priority, setPriority] = useState<Task["priority"]>("Medium");
+  const [title, setTitle] = useState(task.title);
+  const [status, setStatus] = useState<Task["status"]>(task.status);
+  const [priority, setPriority] = useState<Task["priority"]>(task.priority);
+  const [dueDate, setDueDate] = useState(task.dueDate);
+  const [projectId, setProjectId] = useState(task.projectId);
+  const [assigneeIds, setAssigneeIds] = useState<string[]>([task.assigneeId]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
+  const { toast } = useToast();
 
-  // Set current user as default assignee when dialog opens
   useEffect(() => {
-    if (open && user) {
-      setAssigneeIds([user.id]);
+    if (open) {
+      setTitle(task.title);
+      setStatus(task.status);
+      setPriority(task.priority);
+      setDueDate(task.dueDate);
+      setProjectId(task.projectId);
+      setAssigneeIds([task.assigneeId]);
     }
-  }, [open, user]);
+  }, [open, task]);
 
   useEffect(() => {
     if (open && teamId) {
@@ -86,47 +94,11 @@ export function CreateTaskDialog({
       .eq("status", "accepted");
 
     if (error) {
-      showError("Failed to load team members: " + error.message);
+      console.error("Failed to load team members:", error);
     } else {
       setTeamMembers((data as any) || []);
     }
     setLoadingMembers(false);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!projectId) {
-      showError("Please select a project");
-      return;
-    }
-    
-    // Use current user as default if no assignees selected
-    const finalAssigneeIds = assigneeIds.length > 0 ? assigneeIds : (user?.id ? [user.id] : []);
-    
-    if (finalAssigneeIds.length === 0) {
-      showError("Unable to assign task. Please try again.");
-      return;
-    }
-    
-    // For now, store the first assignee (backward compatible with current Task type)
-    // In the future, you can update the Task type to support multiple assignees
-    const newTask = addTask({
-      title,
-      projectId,
-      assigneeId: finalAssigneeIds[0],
-      dueDate,
-      priority,
-      status: "To Do",
-    });
-    onTaskCreated(newTask);
-    showSuccess(`Task created and assigned to ${finalAssigneeIds.length} member(s)!`);
-    setOpen(false);
-    // Reset form
-    setTitle("");
-    setProjectId(defaultProjectId || "");
-    setAssigneeIds([]);
-    setDueDate("");
-    setPriority("Medium");
   };
 
   const toggleAssignee = (userId: string) => {
@@ -141,54 +113,74 @@ export function CreateTaskDialog({
     setAssigneeIds((prev) => prev.filter((id) => id !== userId));
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (assigneeIds.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please assign at least one team member.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const updatedTask: Task = {
+      ...task,
+      title,
+      status,
+      priority,
+      dueDate,
+      projectId,
+      assigneeId: assigneeIds[0], // Store first assignee for backward compatibility
+    };
+
+    onTaskUpdated(updatedTask);
+    toast({
+      title: "Task updated",
+      description: "The task has been successfully updated.",
+    });
+    onOpenChange(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>Create Task</Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create New Task</DialogTitle>
+          <DialogTitle>Edit Task</DialogTitle>
           <DialogDescription>
-            Fill in the details below to create a new task.
+            Update the task details below.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right">
-                Title
-              </Label>
-              <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="col-span-3" required />
+            <div className="grid gap-2">
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="project" className="text-right">
-                Project
-              </Label>
-              <Select onValueChange={setProjectId} value={projectId} required>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select a project" />
+            <div className="grid gap-2">
+              <Label htmlFor="project">Project</Label>
+              <Select value={projectId} onValueChange={setProjectId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select project" />
                 </SelectTrigger>
                 <SelectContent>
-                  {projects.length === 0 ? (
-                    <SelectItem value="none" disabled>
-                      No projects available
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.name}
                     </SelectItem>
-                  ) : (
-                    projects.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name}
-                      </SelectItem>
-                    ))
-                  )}
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">
-                Assignees
-              </Label>
-              <div className="col-span-3 space-y-3">
+            <div className="grid gap-2">
+              <Label>Assignees</Label>
+              <div className="space-y-3">
                 {/* Selected assignees */}
                 {assigneeIds.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-2">
@@ -220,12 +212,12 @@ export function CreateTaskDialog({
                     {user && (
                       <div className="flex items-center space-x-2">
                         <Checkbox
-                          id={`assignee-${user.id}`}
+                          id={`edit-assignee-${user.id}`}
                           checked={assigneeIds.includes(user.id)}
                           onCheckedChange={() => toggleAssignee(user.id)}
                         />
                         <Label
-                          htmlFor={`assignee-${user.id}`}
+                          htmlFor={`edit-assignee-${user.id}`}
                           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                         >
                           Me (You)
@@ -242,12 +234,12 @@ export function CreateTaskDialog({
                         .map((member, index) => (
                           <div key={member.user_id} className="flex items-center space-x-2">
                             <Checkbox
-                              id={`assignee-${member.user_id}`}
+                              id={`edit-assignee-${member.user_id}`}
                               checked={assigneeIds.includes(member.user_id)}
                               onCheckedChange={() => toggleAssignee(member.user_id)}
                             />
                             <Label
-                              htmlFor={`assignee-${member.user_id}`}
+                              htmlFor={`edit-assignee-${member.user_id}`}
                               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                             >
                               {member.profiles?.full_name || `User ${index + 1}`}
@@ -262,18 +254,23 @@ export function CreateTaskDialog({
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="dueDate" className="text-right">
-                Due Date
-              </Label>
-              <Input id="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="col-span-3" required />
+            <div className="grid gap-2">
+              <Label htmlFor="status">Status</Label>
+              <Select value={status} onValueChange={(value) => setStatus(value as Task["status"])}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="To Do">To Do</SelectItem>
+                  <SelectItem value="In Progress">In Progress</SelectItem>
+                  <SelectItem value="Done">Done</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="priority" className="text-right">
-                Priority
-              </Label>
-              <Select onValueChange={(value: Task["priority"]) => setPriority(value)} defaultValue={priority}>
-                <SelectTrigger className="col-span-3">
+            <div className="grid gap-2">
+              <Label htmlFor="priority">Priority</Label>
+              <Select value={priority} onValueChange={(value) => setPriority(value as Task["priority"])}>
+                <SelectTrigger>
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent>
@@ -283,9 +280,22 @@ export function CreateTaskDialog({
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid gap-2">
+              <Label htmlFor="dueDate">Due Date</Label>
+              <Input
+                id="dueDate"
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                required
+              />
+            </div>
           </div>
           <DialogFooter>
-            <Button type="submit">Create Task</Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">Save Changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>
